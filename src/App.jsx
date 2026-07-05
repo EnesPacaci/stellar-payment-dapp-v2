@@ -42,6 +42,28 @@ function parseMilestoneStatus(status) {
   return 0
 }
 
+const STEP_LABELS = ['', 'Simulating on Soroban...', 'Waiting for wallet signature...', 'Submitting to network...', 'Confirming...']
+const getStepStatus = (step, attempt, maxAttempts) =>
+  `Step ${step}/4: ${STEP_LABELS[step]}${attempt > 1 ? ` (attempt ${attempt}/${maxAttempts})` : ''}`
+const isRetryableError = (error) =>
+  error?.response?.status === 400 || error?.message?.includes('400') ||
+  error?.message?.includes('timeout') || error?.message?.includes('rate limit') ||
+  error?.message?.includes('try again')
+
+const executeWithRetry = async (fn, { maxRetries = 3, retryDelay = 2000 } = {}) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn(attempt, maxRetries)
+    } catch (error) {
+      if (isRetryableError(error) && attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, retryDelay))
+        continue
+      }
+      throw error
+    }
+  }
+}
+
 function parseContractError(error, context) {
   const msg = error?.message || String(error) || ''
   if (msg.includes('rejected') || msg.includes('User rejected')) return 'Transaction rejected by user.'
@@ -584,54 +606,58 @@ function App() {
     }
 
     setIsSending(true)
-    setStatus('Building transaction...')
     setTxHash('')
 
     try {
-      const account = await HORIZON_SERVER.loadAccount(publicKey)
-      const amountStroops = Math.floor(parseFloat(amount) * 10_000_000)
-      const campaignContract = new Contract(selectedCampaign.address)
+      const result = await executeWithRetry(async (attempt, maxAttempts) => {
+        const account = await HORIZON_SERVER.loadAccount(publicKey)
+        const amountStroops = Math.floor(parseFloat(amount) * 10_000_000)
+        const campaignContract = new Contract(selectedCampaign.address)
 
-      const transaction = new TransactionBuilder(account, {
-        fee: await HORIZON_SERVER.fetchBaseFee(),
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          campaignContract.call(
-            'donate',
-            nativeToScVal(new Address(publicKey), { type: 'address' }),
-            nativeToScVal(amountStroops, { type: 'i128' })
+        const transaction = new TransactionBuilder(account, {
+          fee: await HORIZON_SERVER.fetchBaseFee(),
+          networkPassphrase: Networks.TESTNET,
+        })
+          .addOperation(
+            campaignContract.call(
+              'donate',
+              nativeToScVal(new Address(publicKey), { type: 'address' }),
+              nativeToScVal(amountStroops, { type: 'i128' })
+            )
           )
-        )
-        .setTimeout(60)
-        .build()
+          .setTimeout(60)
+          .build()
 
-      setStatus('Simulating transaction...')
-      const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
-      if (simResult.error) throw simResult.error
+        setStatus(getStepStatus(1, attempt, maxAttempts))
+        const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
+        if (simResult.error) throw simResult.error
 
-      const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
+        const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-      setStatus('Waiting for wallet signature...')
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        setStatus(getStepStatus(2, attempt, maxAttempts))
+        const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+          networkPassphrase: Networks.TESTNET,
+        })
+
+        setStatus(getStepStatus(3, attempt, maxAttempts))
+        const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+        const res = await HORIZON_SERVER.submitTransaction(signedTx)
+
+        setTxHash(res.hash)
+        return { result: res, amountStroops }
       })
 
-      setStatus('Submitting to network...')
-      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-      const result = await HORIZON_SERVER.submitTransaction(signedTx)
-
-      setTxHash(result.hash)
       setStatus('Donation successful!')
       fireConfetti()
 
+      const { amountStroops } = result
       const key = `crowdfund_donations_${selectedCampaign.address}`
       const stored = localStorage.getItem(key)
       const donations = stored ? JSON.parse(stored) : []
       donations.unshift({
         address: publicKey,
         amount: String(amountStroops),
-        tx: result.hash,
+        tx: result.result.hash,
         time: new Date().toISOString(),
       })
       localStorage.setItem(key, JSON.stringify(donations))
@@ -768,12 +794,10 @@ function App() {
       return
     }
     setIsSending(true)
-    setStatus('Submitting milestone...')
     setTxHash('')
 
-    const maxRetries = 3
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
+    try {
+      await executeWithRetry(async (attempt, maxAttempts) => {
         const account = await HORIZON_SERVER.loadAccount(publicKey)
         const campaignContract = new Contract(campaignAddr)
         const transaction = new TransactionBuilder(account, {
@@ -790,22 +814,25 @@ function App() {
           .setTimeout(60)
           .build()
 
-        setStatus('Simulating transaction...')
+        setStatus(getStepStatus(1, attempt, maxAttempts))
         const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
         if (simResult.error) throw simResult.error
         const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-        setStatus('Waiting for wallet signature...')
+        setStatus(getStepStatus(2, attempt, maxAttempts))
         const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
           networkPassphrase: Networks.TESTNET,
         })
 
-        setStatus('Submitting to network...')
+        setStatus(getStepStatus(3, attempt, maxAttempts))
         const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
         const result = await HORIZON_SERVER.submitTransaction(signedTx)
-        setStatus('Milestone submitted successfully!')
+
         setTxHash(result.hash)
-        fireConfetti()
+      })
+
+      setStatus('Milestone submitted successfully!')
+      fireConfetti()
       if (selectedCampaign) {
         const ms = [...selectedCampaign.milestones]
         ms[index] = { ...ms[index], status: 1 }
@@ -820,21 +847,12 @@ function App() {
         const fresh = await fetchSingleCampaign(campaignAddr)
         if (fresh && fresh.name !== 'Loading...' && useStore.getState().selectedCampaign?.address === campaignAddr) setSelectedCampaign(fresh)
       }, 3000)
-        setIsSending(false)
-        return
-      } catch (error) {
-        const is400 = error?.response?.status === 400 || error?.message?.includes('400')
-        if (is400 && attempt < maxRetries - 1) {
-          setStatus(`Retrying... (${attempt + 1}/${maxRetries})`)
-          await new Promise(r => setTimeout(r, 2000))
-          continue
-        }
-        console.error('Submit milestone failed', error)
-        setStatus(parseContractError(error, 'submit'))
-        break
-      }
+    } catch (error) {
+      console.error('Submit milestone failed', error)
+      setStatus(parseContractError(error, 'submit'))
+    } finally {
+      setIsSending(false)
     }
-    setIsSending(false)
   }
 
   const voteOnMilestone = async (campaignAddr, index, approve) => {
@@ -847,41 +865,44 @@ function App() {
     const action = approve ? 'vote_approve' : 'vote_reject'
     const label = approve ? 'Approve' : 'Reject'
     setIsSending(true)
-    setStatus(`Casting ${label.toLowerCase()} vote...`)
     setTxHash('')
 
     try {
-      const account = await HORIZON_SERVER.loadAccount(publicKey)
-      const campaignContract = new Contract(campaignAddr)
-      const transaction = new TransactionBuilder(account, {
-        fee: await HORIZON_SERVER.fetchBaseFee(),
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          campaignContract.call(
-            action,
-            new Address(publicKey).toScVal(),
-            nativeToScVal(index, { type: 'u32' })
+      await executeWithRetry(async (attempt, maxAttempts) => {
+        const account = await HORIZON_SERVER.loadAccount(publicKey)
+        const campaignContract = new Contract(campaignAddr)
+        const transaction = new TransactionBuilder(account, {
+          fee: await HORIZON_SERVER.fetchBaseFee(),
+          networkPassphrase: Networks.TESTNET,
+        })
+          .addOperation(
+            campaignContract.call(
+              action,
+              new Address(publicKey).toScVal(),
+              nativeToScVal(index, { type: 'u32' })
+            )
           )
-        )
-        .setTimeout(60)
-        .build()
+          .setTimeout(60)
+          .build()
 
-      setStatus('Simulating transaction...')
-      const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
-      if (simResult.error) throw simResult.error
-      const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
+        setStatus(getStepStatus(1, attempt, maxAttempts))
+        const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
+        if (simResult.error) throw simResult.error
+        const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-      setStatus('Waiting for wallet signature...')
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        setStatus(getStepStatus(2, attempt, maxAttempts))
+        const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+          networkPassphrase: Networks.TESTNET,
+        })
+
+        setStatus(getStepStatus(3, attempt, maxAttempts))
+        const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+        const result = await HORIZON_SERVER.submitTransaction(signedTx)
+
+        setTxHash(result.hash)
       })
 
-      setStatus('Submitting to network...')
-      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-      const result = await HORIZON_SERVER.submitTransaction(signedTx)
       setStatus(`${label} vote cast successfully!`)
-      setTxHash(result.hash)
       fireConfetti()
 
       const voterKey = `crowdfund_voters_${campaignAddr}_${index}`
@@ -914,17 +935,14 @@ function App() {
   const releaseMilestone = async (campaignAddr, index) => {
     if (!publicKey) return
     setIsSending(true)
-    setStatus('Checking votes and releasing milestone...')
     setTxHash('')
     try {
-      // Önce campaign state'ini çekip şartları kontrol et
       const [info, voteStatus] = await Promise.all([
         invokeCampaignRead(campaignAddr, 'get_info'),
         invokeCampaignRead(campaignAddr, 'get_vote_status', nativeToScVal(index, { type: 'u32' }))
       ])
       if (!info) throw new Error('Campaign not found')
       
-      const goal = Number(info[0] || 0)
       const raised = Number(info[1] || 0)
       const totalReleased = (await invokeCampaignRead(campaignAddr, 'get_total_released')) || '0'
       
@@ -936,7 +954,6 @@ function App() {
       const ms = milestones?.[index]
       const msAmount = ms ? Number(ms.amount || 0) : 0
       
-      // Şart kontrolü — bizim hata mesajlarımız
       const available = raised - Number(totalReleased)
       if (available < msAmount) {
         throw new Error('Not enough funds available for this milestone. Need ' + (msAmount / 10_000_000).toFixed(0) + ' XLM, but only ' + (available / 10_000_000).toFixed(1) + ' XLM available after previous releases.')
@@ -957,36 +974,40 @@ function App() {
         throw new Error('Quorum not met. Need >50% of donors to vote.')
       }
 
-      const account = await HORIZON_SERVER.loadAccount(publicKey)
-      const campaignContract = new Contract(campaignAddr)
-      const transaction = new TransactionBuilder(account, {
-        fee: await HORIZON_SERVER.fetchBaseFee(),
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          campaignContract.call(
-            'release_milestone',
-            nativeToScVal(index, { type: 'u32' })
+      await executeWithRetry(async (attempt, maxAttempts) => {
+        const account = await HORIZON_SERVER.loadAccount(publicKey)
+        const campaignContract = new Contract(campaignAddr)
+        const transaction = new TransactionBuilder(account, {
+          fee: await HORIZON_SERVER.fetchBaseFee(),
+          networkPassphrase: Networks.TESTNET,
+        })
+          .addOperation(
+            campaignContract.call(
+              'release_milestone',
+              nativeToScVal(index, { type: 'u32' })
+            )
           )
-        )
-        .setTimeout(60)
-        .build()
+          .setTimeout(60)
+          .build()
 
-      setStatus('Simulating transaction...')
-      const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
-      if (simResult.error) throw simResult.error
-      const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
+        setStatus(getStepStatus(1, attempt, maxAttempts))
+        const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
+        if (simResult.error) throw simResult.error
+        const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-      setStatus('Waiting for wallet signature...')
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        setStatus(getStepStatus(2, attempt, maxAttempts))
+        const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+          networkPassphrase: Networks.TESTNET,
+        })
+
+        setStatus(getStepStatus(3, attempt, maxAttempts))
+        const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+        const result = await HORIZON_SERVER.submitTransaction(signedTx)
+
+        setTxHash(result.hash)
       })
 
-      setStatus('Submitting to network...')
-      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-      const result = await HORIZON_SERVER.submitTransaction(signedTx)
       setStatus('Milestone released successfully!')
-      setTxHash(result.hash)
       fireConfetti()
       await fetchBalance(publicKey)
 
@@ -1012,40 +1033,43 @@ function App() {
       return
     }
     setIsSending(true)
-    setStatus('Claiming refund...')
     setTxHash('')
     try {
-      const account = await HORIZON_SERVER.loadAccount(publicKey)
-      const campaignContract = new Contract(campaignAddr)
-      const transaction = new TransactionBuilder(account, {
-        fee: await HORIZON_SERVER.fetchBaseFee(),
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          campaignContract.call(
-            'claim_refund',
-            nativeToScVal(new Address(publicKey), { type: 'address' }),
-            nativeToScVal(index, { type: 'u32' })
+      await executeWithRetry(async (attempt, maxAttempts) => {
+        const account = await HORIZON_SERVER.loadAccount(publicKey)
+        const campaignContract = new Contract(campaignAddr)
+        const transaction = new TransactionBuilder(account, {
+          fee: await HORIZON_SERVER.fetchBaseFee(),
+          networkPassphrase: Networks.TESTNET,
+        })
+          .addOperation(
+            campaignContract.call(
+              'claim_refund',
+              nativeToScVal(new Address(publicKey), { type: 'address' }),
+              nativeToScVal(index, { type: 'u32' })
+            )
           )
-        )
-        .setTimeout(60)
-        .build()
+          .setTimeout(60)
+          .build()
 
-      setStatus('Simulating transaction...')
-      const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
-      if (simResult.error) throw simResult.error
-      const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
+        setStatus(getStepStatus(1, attempt, maxAttempts))
+        const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
+        if (simResult.error) throw simResult.error
+        const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-      setStatus('Waiting for wallet signature...')
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        setStatus(getStepStatus(2, attempt, maxAttempts))
+        const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+          networkPassphrase: Networks.TESTNET,
+        })
+
+        setStatus(getStepStatus(3, attempt, maxAttempts))
+        const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+        const result = await HORIZON_SERVER.submitTransaction(signedTx)
+
+        setTxHash(result.hash)
       })
 
-      setStatus('Submitting to network...')
-      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-      const result = await HORIZON_SERVER.submitTransaction(signedTx)
       setStatus('Refund claimed successfully!')
-      setTxHash(result.hash)
       fireConfetti()
       await fetchBalance(publicKey)
 
@@ -1066,42 +1090,46 @@ function App() {
   const withdrawFunds = async () => {
     if (!publicKey || !selectedCampaign) return
     setIsSending(true)
-    setStatus('Withdrawing released funds...')
     setTxHash('')
     try {
-      const account = await HORIZON_SERVER.loadAccount(publicKey)
-      const campaignContract = new Contract(selectedCampaign.address)
       const available = Number(selectedCampaign.totalReleased || 0) - Number(selectedCampaign.totalWithdrawn || 0)
 
-      const transaction = new TransactionBuilder(account, {
-        fee: await HORIZON_SERVER.fetchBaseFee(),
-        networkPassphrase: Networks.TESTNET,
-      })
-        .addOperation(
-          campaignContract.call(
-            'withdraw',
-            new Address(publicKey).toScVal(),
-            nativeToScVal(available, { type: 'i128' })
+      await executeWithRetry(async (attempt, maxAttempts) => {
+        const account = await HORIZON_SERVER.loadAccount(publicKey)
+        const campaignContract = new Contract(selectedCampaign.address)
+
+        const transaction = new TransactionBuilder(account, {
+          fee: await HORIZON_SERVER.fetchBaseFee(),
+          networkPassphrase: Networks.TESTNET,
+        })
+          .addOperation(
+            campaignContract.call(
+              'withdraw',
+              new Address(publicKey).toScVal(),
+              nativeToScVal(available, { type: 'i128' })
+            )
           )
-        )
-        .setTimeout(60)
-        .build()
+          .setTimeout(60)
+          .build()
 
-      setStatus('Simulating transaction...')
-      const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
-      if (simResult.error) throw simResult.error
-      const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
+        setStatus(getStepStatus(1, attempt, maxAttempts))
+        const simResult = await SOROBAN_SERVER.simulateTransaction(transaction)
+        if (simResult.error) throw simResult.error
+        const assembledTx = rpc.assembleTransaction(transaction, simResult).build()
 
-      setStatus('Waiting for wallet signature...')
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        setStatus(getStepStatus(2, attempt, maxAttempts))
+        const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+          networkPassphrase: Networks.TESTNET,
+        })
+
+        setStatus(getStepStatus(3, attempt, maxAttempts))
+        const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+        const result = await HORIZON_SERVER.submitTransaction(signedTx)
+
+        setTxHash(result.hash)
       })
 
-      setStatus('Submitting to network...')
-      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-      const result = await HORIZON_SERVER.submitTransaction(signedTx)
       setStatus('Funds withdrawn successfully!')
-      setTxHash(result.hash)
       fireConfetti()
       await fetchBalance(publicKey)
 

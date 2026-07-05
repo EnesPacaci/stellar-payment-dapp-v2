@@ -92,7 +92,7 @@ RiseIn gereksinimlerine %100 odaklanÄ±lacak. Idea Submission'da planlanan SEP-
   - CanlÄ± balance gÃ¶stergesi (yeÅŸil Balanced / sarÄ± X left / kÄ±rmÄ±zÄ± X over).
 
 ##### 2. Product Stability (Sistem KararlÄ±lÄ±ÄŸÄ±)
-- [ ] **Step-by-Step Transaction Loader (Ä°ÅŸlem YÃ¼kleyici):**
+- [x] **Step-by-Step Transaction Loader (Ä°ÅŸlem YÃ¼kleyici):**
   - Soroban iÅŸlemleri sÄ±rasÄ±nda durum gÃ¼ncelleyen ekran (Simulating, Waiting for wallet signature, Submitting, Confirming).
   - Zaman aÅŸÄ±mÄ±nda veya hatada otomatik 3 kere yeniden deneme (retry) ve gÃ¼venli hata kurtarma (error recovery) mekanizmasÄ±.
 - [ ] **Live Wallet Account Listener (CanlÄ± CÃ¼zdan Ä°zleyici):**
