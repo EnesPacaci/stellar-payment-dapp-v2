@@ -11,7 +11,7 @@ export default function CreateCampaign({ onSubmit }) {
   ])
   const isSending = useStore((s) => s.isSending)
   const publicKey = useStore((s) => s.publicKey)
-  const status = useStore((s) => s.status) // status'u ekledim
+  const status = useStore((s) => s.status)
 
   const addMilestone = () => {
     setMilestones([...milestones, { amount: '', description: '' }])
@@ -28,12 +28,42 @@ export default function CreateCampaign({ onSubmit }) {
     setMilestones(updated)
   }
 
+  const distributeEqually = () => {
+    const g = parseFloat(goal)
+    if (!g || g <= 0 || milestones.length === 0) return
+    const perMs = Math.floor(g / milestones.length)
+    let remainder = g - perMs * milestones.length
+    const updated = milestones.map((m, i) => ({
+      ...m,
+      amount: i === milestones.length - 1 ? (perMs + remainder).toString() : perMs.toString(),
+    }))
+    setMilestones(updated)
+  }
+
   const milestoneTotal = milestones.reduce(
     (sum, m) => sum + (parseFloat(m.amount) || 0),
     0
   )
   const goalNum = parseFloat(goal) || 0
-  const milestonesMatch = goalNum > 0 && Math.abs(milestoneTotal - goalNum) < 0.01
+  const remaining = goalNum - milestoneTotal
+  const isBalanced = goalNum > 0 && Math.abs(remaining) < 0.01
+  const isOver = goalNum > 0 && remaining < -0.01
+  const isUnder = goalNum > 0 && remaining > 0.01
+  const milestonesMatch = isBalanced
+
+  const fillRemaining = () => {
+    if (!goalNum || goalNum <= 0) return
+    const emptyIndices = milestones
+      .map((m, i) => ({ i, empty: !m.amount || parseFloat(m.amount) <= 0 }))
+      .filter((x) => x.empty)
+    if (emptyIndices.length !== 1 || emptyIndices[0].i !== milestones.length - 1) return
+    const updated = [...milestones]
+    updated[milestones.length - 1] = { ...updated[milestones.length - 1], amount: remaining.toFixed(0) }
+    setMilestones(updated)
+  }
+
+  const emptyMilestoneCount = milestones.filter((m) => !m.amount || parseFloat(m.amount) <= 0).length
+  const canFillRemaining = goalNum > 0 && remaining > 0 && emptyMilestoneCount === 1 && (!milestones[milestones.length - 1].amount || parseFloat(milestones[milestones.length - 1].amount) <= 0)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -125,9 +155,38 @@ export default function CreateCampaign({ onSubmit }) {
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs font-medium text-slate-300">Milestones</label>
-              <span className={`text-xs font-mono ${milestonesMatch ? 'text-green-400' : 'text-slate-500'}`}>
-                {milestoneTotal.toFixed(0)} / {goalNum || 0} XLM
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  {goalNum > 0 && milestones.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={distributeEqually}
+                      disabled={isSending}
+                      className="text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-400 hover:border-cyan-400/50 hover:text-cyan-400 transition-colors disabled:opacity-50"
+                    >
+                      Equal
+                    </button>
+                  )}
+                  {canFillRemaining && (
+                    <button
+                      type="button"
+                      onClick={fillRemaining}
+                      disabled={isSending}
+                      className="text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-400 hover:border-cyan-400/50 hover:text-cyan-400 transition-colors disabled:opacity-50"
+                      title={`Fill last milestone with remaining ${remaining.toFixed(0)} XLM`}
+                    >
+                      Fill Last
+                    </button>
+                  )}
+                </div>
+                {goalNum > 0 && (
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                    isBalanced ? 'bg-green-500/10 text-green-400' : isOver ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-400'
+                  }`}>
+                    {isBalanced ? 'Balanced ✅' : isOver ? `${Math.abs(remaining).toFixed(0)} over` : `${remaining.toFixed(0)} left`}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -135,15 +194,17 @@ export default function CreateCampaign({ onSubmit }) {
                 <div key={i} className="bg-slate-900 rounded-lg p-3 border border-slate-700">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-slate-400">Phase {i + 1}</span>
-                    {milestones.length > 1 && !isSending && (
-                      <button
-                        type="button"
-                        onClick={() => removeMilestone(i)}
-                        className="text-xs text-red-400 hover:text-red-300"
-                      >
-                        Remove
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {milestones.length > 1 && !isSending && (
+                        <button
+                          type="button"
+                          onClick={() => removeMilestone(i)}
+                          className="text-xs text-red-400 hover:text-red-300"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <input
                     type="text"

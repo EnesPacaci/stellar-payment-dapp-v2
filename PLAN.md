@@ -86,8 +86,10 @@ RiseIn gereksinimlerine %100 odaklanÄ±lacak. Idea Submission'da planlanan SEP-
   - DurumlarÄ± renk kodlu noktalarla baÄŸla, overflow durumuna gÃ¶re scroll + kÄ±saltma.
 - [x] **Donor Leaderboard (BaÄŸÄ±ÅŸÃ§Ä± Liderlik Tablosu):**
   - RecentDonations kartÄ±na entegre, store verisinden gruplayarak en Ã§ok baÄŸÄ±ÅŸ yapan ilk 3 cÃ¼zdanÄ± medal ikonlarÄ±yla gÃ¶ster.
-- [ ] **Smart Budget Allocator (AkÄ±llÄ± BÃ¼tÃ§e DaÄŸÄ±tÄ±cÄ±):**
-  - Kampanya oluÅŸtururken kalan bÃ¼tÃ§eyi otomatik hesapla, tek tÄ±kla eÅŸit daÄŸÄ±tma seÃ§eneÄŸi ekle.
+- [x] **Smart Budget Allocator (AkÄ±llÄ± BÃ¼tÃ§e DaÄŸÄ±tÄ±cÄ±):**
+  - "Distribute Equally" ile goal'i milestone'lara eÅŸit bÃ¶l.
+  - "Fill Last" ile son boÅŸ milestone'a kalan bÃ¼tÃ§eyi otomatik ata.
+  - CanlÄ± balance gÃ¶stergesi (yeÅŸil Balanced / sarÄ± X left / kÄ±rmÄ±zÄ± X over).
 
 ##### 2. Product Stability (Sistem KararlÄ±lÄ±ÄŸÄ±)
 - [ ] **Step-by-Step Transaction Loader (Ä°ÅŸlem YÃ¼kleyici):**
