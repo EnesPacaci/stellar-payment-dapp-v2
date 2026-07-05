@@ -7,6 +7,7 @@ import { LobstrModule } from '@creit.tech/stellar-wallets-kit/modules/lobstr'
 import { xBullModule } from '@creit.tech/stellar-wallets-kit/modules/xbull'
 import { RabetModule } from '@creit.tech/stellar-wallets-kit/modules/rabet'
 import { HanaModule } from '@creit.tech/stellar-wallets-kit/modules/hana'
+import { getAddress as getFreighterAddress, WatchWalletChanges } from '@stellar/freighter-api'
 
 import useStore from './store'
 import Header from './components/Header'
@@ -102,6 +103,7 @@ const kit = StellarWalletsKit.init({
 
 function App() {
   const canvasRef = useRef(null)
+  const statusTimerRef = useRef(null)
   const {
     setPublicKey, setBalance, setWalletName, setStatus, setTxHash,
     setIsSending, setTotalRaised, setGoal, setDeadline, setRecentDonors,
@@ -114,6 +116,12 @@ function App() {
 
   const campaignSearch = useStore((s) => s.campaignSearch)
   const setCampaignSearch = useStore((s) => s.setCampaignSearch)
+
+  const setTimedStatus = (msg) => {
+    setStatus(msg)
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current)
+    statusTimerRef.current = setTimeout(() => setStatus(''), 10000)
+  }
 
   const fireConfetti = () => {
     const canvas = canvasRef.current
@@ -522,9 +530,9 @@ function App() {
     let timeout
     const poll = async () => {
       await fetchCampaigns()
-      timeout = setTimeout(poll, 15000)
+      timeout = setTimeout(poll, 17000)
     }
-    timeout = setTimeout(poll, 15000)
+    timeout = setTimeout(poll, 17000)
     return () => clearTimeout(timeout)
   }, [selectedCampaign, fetchCampaigns])
 
@@ -561,22 +569,87 @@ function App() {
     return () => { cancelled = true; clearTimeout(timeout) }
   }, [selectedCampaign, fetchRecentDonors])
 
+  const prevAddressRef = useRef(null)
+  const disconnectRef = useRef(localStorage.getItem('wallet_disconnected') === 'true')
+
   useEffect(() => {
-    const unsub = StellarWalletsKit.on('STATE_UPDATE', (e) => {
-      if (e.payload.address) {
-        setPublicKey(e.payload.address)
-        fetchBalance(e.payload.address)
+    disconnectRef.current = localStorage.getItem('wallet_disconnected') === 'true'
+
+    const handleAccountSwitch = async (newAddress) => {
+      if (disconnectRef.current) return
+      const prevAddress = prevAddressRef.current
+      if (newAddress && typeof newAddress === 'string' && newAddress !== prevAddress) {
+        setPublicKey(newAddress)
+        await fetchBalance(newAddress)
         if (StellarWalletsKit.selectedModule) {
           setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
         }
+        if (prevAddress) {
+          setSelectedCampaign(null)
+          setTimedStatus('Account switched')
+          await fetchCampaigns()
+        }
+        prevAddressRef.current = newAddress
       }
+    }
+
+    const unsub = StellarWalletsKit.on('STATE_UPDATE', (e) => {
+      handleAccountSwitch(e.payload?.address)
     })
-    return () => unsub()
-  }, [setPublicKey, setWalletName, fetchBalance])
+
+    let watcher = null
+    try {
+      watcher = new WatchWalletChanges(5000)
+      watcher.watch(({ address }) => {
+        handleAccountSwitch(address)
+      })
+    } catch (e) {
+      // WatchWalletChanges not supported in this environment (e.g., test/Node)
+    }
+
+    return () => {
+      unsub()
+      if (watcher) watcher.stop()
+    }
+  }, [setPublicKey, setWalletName, fetchBalance, fetchCampaigns, setSelectedCampaign, setStatus])
+
+  const syncWallet = async () => {
+    try {
+      let currentAddress = null
+      try {
+        if (typeof getFreighterAddress === 'function') {
+          currentAddress = await getFreighterAddress()
+        }
+      } catch (e) {
+        // Freighter API not available; fall back to current publicKey
+      }
+
+      const targetAddress = (typeof currentAddress === 'string' && currentAddress.length > 0) ? currentAddress : publicKey
+
+      if (targetAddress) {
+        if (targetAddress !== publicKey) {
+          setPublicKey(targetAddress)
+          if (StellarWalletsKit.selectedModule) {
+            setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
+          }
+          await fetchCampaigns()
+        }
+        await fetchBalance(targetAddress)
+        setTimedStatus('Wallet synced successfully!')
+      } else {
+        setTimedStatus('No active wallet session found.')
+      }
+    } catch (error) {
+      console.error('Sync failed', error)
+      setTimedStatus('Failed to sync wallet.')
+    }
+  }
 
   const connectWallet = async () => {
     try {
       const { address } = await StellarWalletsKit.authModal()
+      localStorage.removeItem('wallet_disconnected')
+      disconnectRef.current = false
       if (StellarWalletsKit.selectedModule) {
         setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
       }
@@ -589,8 +662,11 @@ function App() {
   }
 
   const disconnectWallet = () => {
+    localStorage.setItem('wallet_disconnected', 'true')
+    disconnectRef.current = true
     StellarWalletsKit.disconnect()
     resetWallet()
+    setTimedStatus('Wallet disconnected')
   }
 
   const sendTransaction = async () => {
@@ -1256,14 +1332,21 @@ function App() {
         style={{ zIndex: 9999 }}
       />
 
-      <Header
-        onConnect={connectWallet}
-        onDisconnect={disconnectWallet}
-        onShowNft={() => {
-          fetchNftTokens()
-          setShowNftModal(true)
-        }}
-      />
+       <Header
+         onConnect={connectWallet}
+         onDisconnect={disconnectWallet}
+         onSync={syncWallet}
+         onShowNft={() => {
+           fetchNftTokens()
+           setShowNftModal(true)
+         }}
+       />
+
+      {status && (
+        <p className={`mt-2 text-xs text-center ${isError ? 'text-red-400' : 'text-cyan-400'}`}>
+          {status}
+        </p>
+      )}
 
       {showNftModal && (
         <NftModal
@@ -1656,12 +1739,6 @@ function App() {
               </p>
 
               <DonateForm onDonate={sendTransaction} />
-
-              {status && (
-                <p className={`mt-3.5 text-xs text-center ${isError ? 'text-red-400' : 'text-slate-400'}`}>
-                  {status}
-                </p>
-              )}
 
               {txHash && (
                 <p className="mt-3.5 text-xs text-center text-cyan-400">

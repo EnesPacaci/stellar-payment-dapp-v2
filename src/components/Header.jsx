@@ -1,6 +1,6 @@
 import useStore from '../store'
 
-export default function Header({ onConnect, onDisconnect, onShowNft }) {
+export default function Header({ onConnect, onDisconnect, onShowNft, onSync }) {
   const { publicKey, balance, walletName, isSending } = useStore()
 
   return (
@@ -19,9 +19,17 @@ export default function Header({ onConnect, onDisconnect, onShowNft }) {
           {walletName && (
             <span className="text-[10px] sm:text-[11px] text-slate-500 hidden sm:inline">{walletName}</span>
           )}
-          <button
-            onClick={onShowNft}
-            disabled={isSending}
+           <button
+             onClick={onSync}
+             disabled={isSending}
+             className="text-[11px] sm:text-xs text-cyan-400 border border-cyan-600/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors hover:bg-cyan-500/10 shrink-0 disabled:opacity-50"
+           >
+             Sync
+           </button>
+           <button
+             onClick={onShowNft}
+             disabled={isSending}
+
             className="text-[11px] sm:text-xs text-purple-400 border border-purple-600/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors hover:bg-purple-500/10 shrink-0 disabled:opacity-50"
           >
             NFTs

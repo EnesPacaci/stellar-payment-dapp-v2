@@ -95,8 +95,12 @@ RiseIn gereksinimlerine %100 odaklanÄ±lacak. Idea Submission'da planlanan SEP-
 - [x] **Step-by-Step Transaction Loader (Ä°ÅŸlem YÃ¼kleyici):**
   - Soroban iÅŸlemleri sÄ±rasÄ±nda durum gÃ¼ncelleyen ekran (Simulating, Waiting for wallet signature, Submitting, Confirming).
   - Zaman aÅŸÄ±mÄ±nda veya hatada otomatik 3 kere yeniden deneme (retry) ve gÃ¼venli hata kurtarma (error recovery) mekanizmasÄ±.
-- [ ] **Live Wallet Account Listener (CanlÄ± CÃ¼zdan Ä°zleyici):**
+- [x] **Live Wallet Account Listener (CanlÄ± CÃ¼zdan Ä°zleyici):**
   - KullanÄ±cÄ± Freighter/Albedo'da hesap deÄŸiÅŸtirdiÄŸinde veya Ã§Ä±kÄ±ÅŸ yaptÄ±ÄŸÄ±nda sayfayÄ± yenilemeden bakiyeyi ve yetkileri anÄ±nda gÃ¼ncelle.
+  - Sync butonu (manual refresh fallback) â€” Freighter API baÅŸarÄ±sÄ±z olursa mevcut publicKey ile Ã§alÄ±ÅŸÄ±r
+  - Bildirim mesajlarÄ± (Account switched, Wallet disconnected, Wallet synced) 10sn sonra otomatik kaybolur
+  - Account switched mesajÄ± refresh'ten Ã¶nce gÃ¶sterilir, refresh arkada devam eder
+  - Campaigns list polling: 15sn â†’ 17sn
 
 ##### 3. Optimize Onboarding Experience (Kolay Onboarding)
 - [ ] **Interactive "Quick Start" Tutorial Sidebar (Rehber Paneli):**
