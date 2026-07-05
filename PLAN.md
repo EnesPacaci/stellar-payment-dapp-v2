@@ -85,7 +85,7 @@ RiseIn gereksinimlerine %100 odaklanÄ±lacak. Idea Submission'da planlanan SEP-
   - Milestone'larÄ± dinamik (compact/full) kronolojik yatay Ã§izgiye dÃ¶nÃ¼ÅŸtÃ¼r.
   - DurumlarÄ± renk kodlu noktalarla baÄŸla, overflow durumuna gÃ¶re scroll + kÄ±saltma.
 - [ ] **Donor Leaderboard (BaÄŸÄ±ÅŸÃ§Ä± Liderlik Tablosu):**
-  - On-chain baÄŸÄ±ÅŸ olaylarÄ±nÄ± tarayarak en Ã§ok baÄŸÄ±ÅŸ yapan ilk 5 cÃ¼zdanÄ± ÅŸÄ±k bir kartta sÄ±rala.
+  - RecentDonations kartÄ±na entegre, store verisinden gruplayarak en Ã§ok baÄŸÄ±ÅŸ yapan ilk 3 cÃ¼zdanÄ± gÃ¶ster.
 - [ ] **Smart Budget Allocator (AkÄ±llÄ± BÃ¼tÃ§e DaÄŸÄ±tÄ±cÄ±):**
   - Kampanya oluÅŸtururken kalan bÃ¼tÃ§eyi otomatik hesapla, tek tÄ±kla eÅŸit daÄŸÄ±tma seÃ§eneÄŸi ekle.
 
