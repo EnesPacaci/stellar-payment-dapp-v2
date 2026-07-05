@@ -17,6 +17,7 @@ import RecentFeedback from './components/RecentFeedback'
 import CreateCampaign from './components/CreateCampaign'
 import FeedbackForm from './components/FeedbackForm'
 import NftModal from './components/NftModal'
+import MilestoneTimeline from './components/MilestoneTimeline'
 import { CONTRACT_ADDRESSES, SOROBAN_RPC_URL, HORIZON_URL, NETWORK_PASSPHRASE } from './config'
 
 const HORIZON_SERVER = new Horizon.Server(HORIZON_URL)
@@ -1379,19 +1380,8 @@ function App() {
           <>
             <div className="bg-slate-800 rounded-xl p-8 shadow-lg border border-slate-700">
               {selectedCampaign.milestones && selectedCampaign.milestones.length > 0 && (
-                <div className="flex items-center gap-1.5 mb-4">
-                  {selectedCampaign.milestones.map((ms, i) => {
-                    const st = parseMilestoneStatus(ms.status)
-                    let dotColor = 'bg-slate-600'
-                    if (st === 0) dotColor = 'bg-slate-500'
-                    if (st === 1) dotColor = 'bg-yellow-400'
-                    if (st === 2) dotColor = 'bg-green-400'
-                    if (st === 3) dotColor = 'bg-red-400'
-                    return <div key={i} className={`w-2.5 h-2.5 rounded-full ${dotColor}`} title={ms.description} />
-                  })}
-                  <span className="text-[10px] text-slate-500 ml-1">
-                    {selectedCampaign.milestones.filter(m => parseMilestoneStatus(m.status) === 2).length}/{selectedCampaign.milestones.length} approved
-                  </span>
+                <div className="mb-4">
+                  <MilestoneTimeline milestones={selectedCampaign.milestones} />
                 </div>
               )}
 
