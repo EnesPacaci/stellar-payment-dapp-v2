@@ -27,8 +27,7 @@ function buildLeaderboard(recentDonors) {
     .map(([address, total]) => ({ address, total }))
 }
 
-const RANK_COLORS = ['text-yellow-400', 'text-slate-300', 'text-orange-400']
-const RANK_BG = ['bg-yellow-500/20', 'bg-slate-300/20', 'bg-orange-400/20']
+const MEDALS = ['🥇', '🥈', '🥉']
 
 export default function RecentDonations() {
   const recentDonors = useStore((s) => s.recentDonors)
@@ -51,9 +50,7 @@ export default function RecentDonations() {
 
               return (
                 <div key={d.address} className="flex items-center gap-2">
-                  <div className={`w-5 h-5 rounded-full ${RANK_BG[i]} flex items-center justify-center shrink-0`}>
-                    <span className={`text-[10px] font-bold ${RANK_COLORS[i]}`}>{i + 1}</span>
-                  </div>
+                  <span className="text-base shrink-0 leading-none">{MEDALS[i]}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline">
                       <span className="text-[10px] font-mono text-slate-400 truncate">
