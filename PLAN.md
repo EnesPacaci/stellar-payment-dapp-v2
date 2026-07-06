@@ -103,9 +103,12 @@ RiseIn gereksinimlerine %100 odaklanÄ±lacak. Idea Submission'da planlanan SEP-
   - Campaigns list polling: 15sn â†’ 17sn
 
 ##### 3. Optimize Onboarding Experience (Kolay Onboarding)
-- [ ] **Interactive "Quick Start" Tutorial Sidebar (Rehber Paneli):**
+- [x] **Interactive "Quick Start" Tutorial Sidebar (Rehber Paneli):**
   - SayfanÄ±n saÄŸÄ±nda aÃ§Ä±lÄ±r-kapanÄ±r, ilk gelen kullanÄ±cÄ±nÄ±n cÃ¼zdan aÃ§masÄ±ndan testnet XLM almasÄ±na kadar olan adÄ±mlarÄ± gÃ¶steren gÃ¶rsel kontrol listesi (checklist).
   - CÃ¼zdana tek tÄ±kla Friendbot Ã¼zerinden XLM yÃ¼kleme butonu entegrasyonu.
+  - 6 adÄ±m: Connect Wallet â†’ Get testnet XLM â†’ Select Campaign â†’ Donate â†’ Vote â†’ NFTs
+  - Progress bar + her adÄ±m store state'e gÃ¶re otomatik âœ… iÅŸaretlenir
+  - Ä°lk ziyarette otomatik aÃ§Ä±lÄ±r, "? butonu ile tekrar aÃ§Ä±lÄ±r
 
 #### C. Google Form Kurulumu (Ä°yileÅŸtirmeler Bittikten Sonra)
 - [ ] Google Form oluÅŸtur (ad, e-posta, cÃ¼zdan adresi, Ã¼rÃ¼n puanÄ± [1-5], en beÄŸenilen Ã¶zellik, geliÅŸtirilmesi gereken yÃ¶n)
