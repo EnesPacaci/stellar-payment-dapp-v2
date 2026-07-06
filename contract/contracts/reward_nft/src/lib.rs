@@ -61,7 +61,6 @@ impl RewardNft {
     }
 
     pub fn bmint(env: Env, caller: Address, recipients: Vec<Address>, campaign: Address, milestone_id: u32, amounts: Vec<i128>) -> Vec<u32> {
-        caller.require_auth();
         assert!(recipients.len() == amounts.len(), "recipients and amounts length mismatch");
 
         let mut token_ids = Vec::new(&env);

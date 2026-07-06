@@ -204,34 +204,6 @@ impl Campaign {
                 assert!(raised >= released + ms_amount, "insufficient funds");
                 env.storage().instance().set(&DataKey::TotalReleased, &(released + ms_amount));
 
-                // Auto-mint NFTs for approved voters
-                let nft_contract: Option<Address> = env.storage().instance().get(&DataKey::NftContract);
-                if let Some(nft_addr) = nft_contract {
-                    let approved_voters: Vec<Address> = env.storage().persistent().get(&DataKey::ApprovedVoters(index)).unwrap_or(Vec::new(&env));
-                    if approved_voters.len() > 0 {
-                        let mut amounts = Vec::new(&env);
-                        let mut i = 0u32;
-                        while i < approved_voters.len() {
-                            let voter = approved_voters.get(i).unwrap();
-                            let donor_total: i128 = env.storage().persistent().get(&DataKey::DonorTotal(voter)).unwrap_or(0);
-                            amounts.push_back(donor_total);
-                            i += 1;
-                        }
-                        let campaign_addr = env.current_contract_address();
-                        let mut args: Vec<Val> = Vec::new(&env);
-                        args.push_back(env.current_contract_address().into_val(&env));
-                        args.push_back(approved_voters.into_val(&env));
-                        args.push_back(campaign_addr.into_val(&env));
-                        args.push_back(index.into_val(&env));
-                        args.push_back(amounts.into_val(&env));
-                        let _: Val = env.invoke_contract::<Val>(
-                            &nft_addr,
-                            &symbol_short!("bmint"),
-                            args,
-                        );
-                    }
-                }
-
                 env.events().publish((symbol_short!("ms_appr"),), (index, ms_amount));
             } else if now > voting_deadline {
                 m.status = MilestoneStatus::Rejected;
