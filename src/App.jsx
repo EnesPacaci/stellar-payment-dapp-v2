@@ -109,7 +109,7 @@ function App() {
     setPublicKey, setBalance, setWalletName, setStatus, setTxHash,
     setIsSending, setTotalRaised, setGoal, setDeadline, setRecentDonors,
     setDonationCount, resetWallet, publicKey, selectedCampaign,
-    setSelectedCampaign, setCampaigns, campaigns, setIsLoadingCampaigns, isSending,
+    setSelectedCampaign, setCampaigns, campaigns, isLoadingCampaigns, setIsLoadingCampaigns, isSending,
     showCreateForm, setShowCreateForm, showNftModal, setShowNftModal,
     nftTokens, setNftTokens, showFeedbackForm, setShowFeedbackForm,
     feedbackSubmitted, setFeedbackSubmitted,
@@ -177,11 +177,17 @@ function App() {
   }
 
   const fetchBalance = useCallback(async (pk) => {
+    if (!pk) return
     try {
       const account = await HORIZON_SERVER.loadAccount(pk)
       const nativeBalance = account.balances.find((b) => b.asset_type === 'native')
-      setBalance(nativeBalance.balance)
-    } catch {
+      if (nativeBalance) {
+        setBalance(nativeBalance.balance)
+      } else {
+        setBalance('0')
+      }
+    } catch (err) {
+      console.error('fetchBalance failed:', err.message || err)
       setBalance('0')
     }
   }, [setBalance])
@@ -516,7 +522,10 @@ function App() {
   }, [publicKey, invokeCampaignRead, setNftTokens])
 
   useEffect(() => {
-    fetchCampaigns()
+    let cancelled = false
+    const load = async () => { if (!cancelled) await fetchCampaigns() }
+    load()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
@@ -528,13 +537,14 @@ function App() {
 
   useEffect(() => {
     if (selectedCampaign) return
+    let cancelled = false
     let timeout
     const poll = async () => {
-      await fetchCampaigns()
-      timeout = setTimeout(poll, 17000)
+      if (!cancelled) await fetchCampaigns()
+      if (!cancelled) timeout = setTimeout(poll, 17000)
     }
     timeout = setTimeout(poll, 17000)
-    return () => clearTimeout(timeout)
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [selectedCampaign, fetchCampaigns])
 
   useEffect(() => {
@@ -571,6 +581,7 @@ function App() {
   }, [selectedCampaign, fetchRecentDonors])
 
   const prevAddressRef = useRef(null)
+  const switchingRef = useRef(false)
   const disconnectRef = useRef(localStorage.getItem('wallet_disconnected') === 'true')
 
   useEffect(() => {
@@ -578,19 +589,25 @@ function App() {
 
     const handleAccountSwitch = async (newAddress) => {
       if (disconnectRef.current) return
+      if (switchingRef.current) return
       const prevAddress = prevAddressRef.current
       if (newAddress && typeof newAddress === 'string' && newAddress !== prevAddress) {
-        setPublicKey(newAddress)
-        await fetchBalance(newAddress)
-        if (StellarWalletsKit.selectedModule) {
-          setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
+        switchingRef.current = true
+        try {
+          prevAddressRef.current = newAddress
+          setPublicKey(newAddress)
+          await fetchBalance(newAddress)
+          if (StellarWalletsKit.selectedModule) {
+            setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
+          }
+          if (prevAddress) {
+            setSelectedCampaign(null)
+            setTimedStatus('Account switched')
+            await fetchCampaigns()
+          }
+        } finally {
+          switchingRef.current = false
         }
-        if (prevAddress) {
-          setSelectedCampaign(null)
-          setTimedStatus('Account switched')
-          await fetchCampaigns()
-        }
-        prevAddressRef.current = newAddress
       }
     }
 
@@ -628,6 +645,8 @@ function App() {
       const targetAddress = (typeof currentAddress === 'string' && currentAddress.length > 0) ? currentAddress : publicKey
 
       if (targetAddress) {
+        switchingRef.current = true
+        prevAddressRef.current = targetAddress
         if (targetAddress !== publicKey) {
           setPublicKey(targetAddress)
           if (StellarWalletsKit.selectedModule) {
@@ -636,11 +655,13 @@ function App() {
           await fetchCampaigns()
         }
         await fetchBalance(targetAddress)
+        switchingRef.current = false
         setTimedStatus('Wallet synced successfully!')
       } else {
         setTimedStatus('No active wallet session found.')
       }
     } catch (error) {
+      switchingRef.current = false
       console.error('Sync failed', error)
       setTimedStatus('Failed to sync wallet.')
     }
@@ -651,6 +672,8 @@ function App() {
       const { address } = await StellarWalletsKit.authModal()
       localStorage.removeItem('wallet_disconnected')
       disconnectRef.current = false
+      prevAddressRef.current = address
+      switchingRef.current = false
       if (StellarWalletsKit.selectedModule) {
         setWalletName(StellarWalletsKit.selectedModule.productName || 'Wallet')
       }
@@ -795,7 +818,7 @@ function App() {
         .addOperation(
           factoryContract.call(
             'create_campaign',
-            nativeToScVal(new Address(publicKey), { type: 'address' }),
+            nativeToScVal(publicKey, { type: 'address' }),
             nativeToScVal(name, { type: 'string' }),
             nativeToScVal(Math.floor(parseFloat(goal) * 10_000_000), { type: 'i128' }),
             nativeToScVal(BigInt(deadline), { type: 'u64' }),
@@ -1084,9 +1107,12 @@ function App() {
         setTxHash(result.hash)
       })
 
-      setStatus('Milestone released successfully!')
+      setStatus('Milestone released! Minting NFTs...')
       fireConfetti()
       await fetchBalance(publicKey)
+
+      // Auto-mint NFTs after successful release (no extra user action needed)
+      mintNfts(campaignAddr, index).catch(e => console.error('Auto-mint error:', e))
 
       setTimeout(async () => {
         const still = useStore.getState().selectedCampaign
@@ -1247,61 +1273,59 @@ function App() {
       )
 
       const nftContract = new Contract(CONTRACT_ADDRESSES.rewardNft)
-      let successCount = 0
-      let lastTxHash = ''
 
-      // Send each mint as separate transaction (Frequently wallet limitation)
-      for (const voter of voterAmounts) {
-        try {
-          const account = await HORIZON_SERVER.loadAccount(publicKey)
-          const voterAmount = BigInt(voter.amount)
+      // Batch mint all NFTs in one transaction using bmint
+      const account = await HORIZON_SERVER.loadAccount(publicKey)
 
-          const tx = new TransactionBuilder(account, {
-            fee: await HORIZON_SERVER.fetchBaseFee(),
-            networkPassphrase: Networks.TESTNET,
-          })
-            .addOperation(
-              nftContract.call(
-                'mint',
-                nativeToScVal(new Address(publicKey), { type: 'address' }),
-                nativeToScVal(new Address(voter.address), { type: 'address' }),
-                nativeToScVal(new Address(campaignAddr), { type: 'address' }),
-                nativeToScVal(milestoneIndex, { type: 'u32' }),
-                nativeToScVal(voterAmount, { type: 'i128' })
-              )
-            )
-            .setTimeout(60)
-            .build()
+      const recipientVec = xdr.ScVal.scvVec(
+        voterAmounts.map(v => new Address(v.address).toScVal())
+      )
 
-          setStatus(`Minting NFT ${successCount + 1}/${voterAmounts.length}...`)
-          const simResult = await SOROBAN_SERVER.simulateTransaction(tx)
-          if (simResult.error) {
-            console.error(`Simulate failed for ${voter.address}:`, simResult.error)
-            continue
-          }
-          const assembledTx = rpc.assembleTransaction(tx, simResult).build()
+      const amountVec = xdr.ScVal.scvVec(
+        voterAmounts.map(v => {
+          const val = BigInt(v.amount)
+          const hi = val >> 64n
+          const lo = val & ((1n << 64n) - 1n)
+          return xdr.ScVal.scvI128(new xdr.Int128Parts({
+            hi: xdr.Int64.fromString(String(hi)),
+            lo: xdr.Uint64.fromString(String(lo)),
+          }))
+        })
+      )
 
-          const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
-            networkPassphrase: Networks.TESTNET,
-          })
+      const tx = new TransactionBuilder(account, {
+        fee: await HORIZON_SERVER.fetchBaseFee(),
+        networkPassphrase: Networks.TESTNET,
+      })
+        .addOperation(
+          nftContract.call(
+            'bmint',
+            new Address(publicKey).toScVal(),
+            recipientVec,
+            new Address(campaignAddr).toScVal(),
+            nativeToScVal(milestoneIndex, { type: 'u32' }),
+            amountVec
+          )
+        )
+        .setTimeout(60)
+        .build()
 
-          const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
-          const result = await HORIZON_SERVER.submitTransaction(signedTx)
-          lastTxHash = result.hash
-          successCount++
-        } catch (err) {
-          console.error(`Mint failed for ${voter.address}:`, err)
-        }
-      }
+      setStatus(`Minting ${voterAmounts.length} NFT(s)...`)
+      const simResult = await SOROBAN_SERVER.simulateTransaction(tx)
+      if (simResult.error) throw simResult.error
+      const assembledTx = rpc.assembleTransaction(tx, simResult).build()
 
-      if (successCount > 0) {
-        setStatus(`${successCount}/${voterAmounts.length} NFT(s) minted successfully!`)
-        setTxHash(lastTxHash)
-        fireConfetti()
-        await fetchNftTokens()
-      } else {
-        setStatus('All NFT mint transactions failed. Check wallet connection.')
-      }
+      const { signedTxXdr } = await StellarWalletsKit.signTransaction(assembledTx.toXDR(), {
+        networkPassphrase: Networks.TESTNET,
+      })
+
+      const signedTx = TransactionBuilder.fromXDR(signedTxXdr, Networks.TESTNET)
+      const result = await HORIZON_SERVER.submitTransaction(signedTx)
+
+      setStatus(`${voterAmounts.length} NFT(s) minted successfully!`)
+      setTxHash(result.hash)
+      fireConfetti()
+      await fetchNftTokens()
     } catch (error) {
       console.error('Mint NFTs failed', error)
       setStatus(parseContractError(error, 'mint'))
@@ -1447,7 +1471,7 @@ function App() {
                 />
               </div>
             )}
-            {useStore.getState().isLoadingCampaigns ? (
+            {isLoadingCampaigns ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="bg-slate-800 rounded-xl p-5 shadow-lg border border-slate-700 animate-pulse">
