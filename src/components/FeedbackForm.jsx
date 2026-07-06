@@ -90,6 +90,16 @@ export default function FeedbackForm({ onClose, onSubmit }) {
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             </div>
+            <div className="mt-3 text-center">
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdUaincH50CJbwy7e52j44Ikdi2Rr5BNx3qScjvn83H986m7g/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-cyan-400 hover:text-cyan-300 underline transition-colors"
+              >
+                Also rate us on Google Forms &rarr;
+              </a>
+            </div>
           </>
         )}
       </div>

@@ -99,9 +99,6 @@ export default function CreateCampaign({ onSubmit }) {
         <div className="flex flex-col items-center justify-center py-16">
           <div className="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mb-5"></div>
           <p className="text-cyan-400 text-sm font-semibold mb-2">Transaction in progress...</p>
-          {status && (
-            <p className="text-slate-400 text-xs animate-pulse">{status}</p>
-          )}
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
