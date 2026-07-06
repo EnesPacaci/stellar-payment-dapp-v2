@@ -115,10 +115,10 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
 - [ ] Excel/CSV yanıt şablonunu hazırla (`docs/user_onboarding_responses.csv`)
 
 #### D. Kullanıcı Büyütme (50+ Testnet Kullanıcısı)
-- [x] 50+ kullanıcı Google Form üzerinden sisteme dahil edildi ve on-chain işlemler gerçekleştirildi
-- [x] Google Form yanıtları toplandı ve `docs/user_onboarding_responses.csv` olarak repo'ya eklendi
-- [x] Stellar Expert üzerinden unique cüzdan işlem kanıtı screenshot'ları alındı
-- [x] Kullanıcı listesi, CSV bağlantısı ve işlem kanıtları README'ye eklendi
+- [ ] 50+ kullanıcı Google Form üzerinden sisteme dahil edilecek ve on-chain işlemler gerçekleştirilecek
+- [ ] Google Form yanıtları toplanacak ve `docs/user_onboarding_responses.csv` olarak repo'ya eklenecek
+- [ ] Stellar Expert üzerinden unique cüzdan işlem kanıtı screenshot'ları alınacak
+- [ ] Kullanıcı listesi, CSV bağlantısı ve işlem kanıtları README'ye eklenecek
 
 #### E. Pitch Deck
 - [ ] İngilizce tam sunum metnini (slayt slayt) hazırla
