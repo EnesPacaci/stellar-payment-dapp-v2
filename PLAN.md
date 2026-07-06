@@ -90,16 +90,23 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
   - "Distribute Equally" ile goal'i milestone'lara eşit böl.
   - "Fill Last" ile son boş milestone'a kalan bütçeyi otomatik ata.
   - Canlı balance göstergesi (yeşil Balanced / sarı X left / kırmızı X over).
+- [x] **Google Forms Link in Feedback Modal:**
+  - FeedbackForm bileşenine "Rate us on Google Forms →" bağlantısı eklendi (harici form, yeni sekmede açılır).
 
 ##### 2. Product Stability (Sistem Kararlılığı)
 - [x] **Step-by-Step Transaction Loader (İşlem Yükleyici):**
   - Soroban işlemleri sırasında durum güncelleyen ekran (Simulating, Waiting for wallet signature, Submitting, Confirming).
   - Zaman aşımında veya hatada otomatik 3 kere yeniden deneme (retry) ve güvenli hata kurtarma (error recovery) mekanizması.
+- [x] **Batch NFT Minting via bmint (Toplu NFT Basımı):**
+  - Milestone release sonrası tüm destekçilere NFT'ler tek transaction'da basılır (bmint).
+  - require_auth kaldırıldı (Soroban v20 frontend auth limitation).
+  - Auto-mint: release sonrası frontend otomatik tetikler, ek işlem gerekmez.
 - [x] **Live Wallet Account Listener (Canlı Cüzdan İzleyici):**
   - Kullanıcı Freighter/Albedo'da hesap değiştirdiğinde veya çıkış yaptığında sayfayı yenilemeden bakiyeyi ve yetkileri anında güncelle.
   - Sync butonu (manual refresh fallback) — Freighter API başarısız olursa mevcut publicKey ile çalışır
   - Bildirim mesajları (Account switched, Wallet disconnected, Wallet synced) 10sn sonra otomatik kaybolur
   - Account switched mesajı refresh'ten önce gösterilir, refresh arkada devam eder
+  - Race condition fix: switchingRef ile eşzamanlı hesap değiştirme işlemleri engellendi, cancel pattern ile polling temizliği
   - Campaigns list polling: 15sn → 17sn
 
 ##### 3. Optimize Onboarding Experience (Kolay Onboarding)
@@ -110,8 +117,9 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
   - Progress bar + her adım store state'e göre otomatik ✅ işaretlenir
   - İlk ziyarette otomatik açılır, "? butonu ile tekrar açılır
 
-#### C. Google Form Kurulumu (İyileştirmeler Bittikten Sonra)
-- [ ] Google Form oluştur (ad, e-posta, cüzdan adresi, ürün puanı [1-5], en beğenilen özellik, geliştirilmesi gereken yön)
+#### C. Google Form Kurulumu
+- [x] Google Form oluştur (ad, e-posta, cüzdan adresi, ürün puanı [1-5], en beğenilen özellik, geliştirilmesi gereken yön)
+- [x] FeedbackForm bileşenine "Rate us on Google Forms" bağlantısı eklendi (harici form, yeni sekmede açılır)
 - [ ] Excel/CSV yanıt şablonunu hazırla (`docs/user_onboarding_responses.csv`)
 
 #### D. Kullanıcı Büyütme (50+ Testnet Kullanıcısı)
