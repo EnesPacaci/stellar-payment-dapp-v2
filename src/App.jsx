@@ -19,6 +19,7 @@ import CreateCampaign from './components/CreateCampaign'
 import FeedbackForm from './components/FeedbackForm'
 import NftModal from './components/NftModal'
 import MilestoneTimeline from './components/MilestoneTimeline'
+import OnboardingGuide from './components/OnboardingGuide'
 import { CONTRACT_ADDRESSES, SOROBAN_RPC_URL, HORIZON_URL, NETWORK_PASSPHRASE } from './config'
 
 const HORIZON_SERVER = new Horizon.Server(HORIZON_URL)
@@ -1791,6 +1792,8 @@ function App() {
           </div>
         )}
       </main>
+
+      <OnboardingGuide />
 
       <footer className="max-w-2xl mx-auto px-4 sm:px-5 py-8 mt-12 border-t border-slate-800">
         <div className="text-center">
