@@ -242,7 +242,7 @@ cargo test
 ## User Feedback Iteration Summary
 
 See [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) for detailed feedback and analysis from 50 testnet users.
-* **Onboarding Data (CSV):** [Download User Onboarding CSV](docs/Stellar%20Crowdfund%20—%20User%20Feedback.csv)
+* **Onboarding Data (CSV):** [Download User Onboarding CSV](docs/Stellar%20Crowdfund%20%E2%80%94%20User%20Feedback.csv)
 * **Average Rating:** 4.6 / 5 stars
 
 ### Product Improvements Completed based on User Feedback
@@ -251,10 +251,10 @@ Based on initial user evaluations, we implemented and deployed three main produc
 
 1. **UX/UI Performance Optimization**
    * *Improvement:* Background campaigns polling is paused when the campaign creation view is open, reducing unnecessary RPC roundtrips and optimizing UI loading responsiveness.
-   * *Commit Link:* [99ad158](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/99ad1586a1172db763e02029c7827e8d4791ea83)
+   * *Commit Link:* [99ad158](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/99ad1588cd5d0889b09c1b5c255e0f8dcc9b7b26)
 2. **Security & Access Controls Enforcement**
    * *Improvement:* Restricted milestone submission actions strictly to the campaign creator (admin) and fixed campaign detail cache checking to resolve creator-withdraw button rendering.
-   * *Commit Link:* [cd79f63](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/cd79f6305a41cb5df16a750059e87593c6607e0c)
+   * *Commit Link:* [cd79f63](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/cd79f6395b7f2a88382c9d2178823e66a2a82131)
 3. **Recent Donors Transaction Slicing**
    * *Improvement:* Aligned total donor count labels with lists by correcting formatting slicing constraints and removing redundant parallel on-chain queries.
 
