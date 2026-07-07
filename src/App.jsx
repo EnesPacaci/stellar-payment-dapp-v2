@@ -351,22 +351,14 @@ function App() {
             ])
             if (!info) return null
             const [goal, raised, deadline] = info
-            const rawMilestones = await invokeCampaignRead(addr, 'get_milestones')
-            const milestones = Array.isArray(rawMilestones)
-              ? rawMilestones.map((m) => {
-                  const st = parseMilestoneStatus(m.status)
-                  return { amount: String(m.amount || '0'), description: String(m.description || ''), status: st }
-                })
-              : []
-            const totalReleased = await invokeCampaignRead(addr, 'get_total_released')
             return {
               address: addr,
               name: name || 'Loading...',
               goal: String(goal),
               raised: String(raised),
               deadline: Number(deadline),
-              milestones,
-              totalReleased: String(totalReleased || '0'),
+              milestones: [],
+              totalReleased: '0',
             }
           } catch {
             return {
@@ -415,7 +407,7 @@ function App() {
           type: 'contract',
           contractIds: [selectedCampaign.address]
         }],
-        pagination: { limit: 100 }
+        pagination: { limit: 1000 }
       })
       if (result.events && result.events.length > 0) {
         const donateEvents = result.events.filter(e => {
@@ -446,15 +438,15 @@ function App() {
           })
           .filter(Boolean)
           .reverse()
-        setDonationCount(donations.length)
-        setRecentDonors(donations.slice(0, 10))
+        setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
+        setRecentDonors(donations)
       } else {
         const key = `crowdfund_donations_${selectedCampaign.address}`
         const stored = localStorage.getItem(key)
         if (stored) {
           const donations = JSON.parse(stored)
-          setDonationCount(donations.length)
-          setRecentDonors(donations.slice(0, 10))
+          setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
+          setRecentDonors(donations)
         } else {
           setDonationCount(0)
           setRecentDonors([])
@@ -466,8 +458,8 @@ function App() {
         const stored = localStorage.getItem(key)
         if (stored) {
           const donations = JSON.parse(stored)
-          setDonationCount(donations.length)
-          setRecentDonors(donations.slice(0, 10))
+          setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
+          setRecentDonors(donations)
         } else {
           setDonationCount(0)
           setRecentDonors([])
@@ -566,19 +558,6 @@ function App() {
     return () => { cancelled = true; clearTimeout(timeout) }
   }, [selectedCampaign, isSending, fetchSingleCampaign])
 
-  useEffect(() => {
-    if (!selectedCampaign) return
-    let cancelled = false
-    let timeout
-    const poll = async () => {
-      if (!cancelled) {
-        await fetchRecentDonors()
-      }
-      if (!cancelled) timeout = setTimeout(poll, 10000)
-    }
-    timeout = setTimeout(poll, 10000)
-    return () => { cancelled = true; clearTimeout(timeout) }
-  }, [selectedCampaign, fetchRecentDonors])
 
   const prevAddressRef = useRef(null)
   const switchingRef = useRef(false)
@@ -850,26 +829,21 @@ function App() {
       const campaignAddrs = await invokeFactoryRead('get_campaigns')
       const newCampaignAddr = campaignAddrs?.[campaignAddrs.length - 1]
 
-      await fetchCampaigns()
-
       if (newCampaignAddr) {
-        let ready = false
         for (let attempt = 1; attempt <= 5; attempt++) {
           try {
             const name = await invokeCampaignRead(newCampaignAddr, 'get_name')
             if (name) {
-              ready = true
               break
             }
           } catch {}
           setStatus(`Waiting for contract data... (${attempt}/5)`)
           await new Promise(resolve => setTimeout(resolve, 3000))
         }
-        if (ready) {
-          setStatus('Refreshing campaign data...')
-          await fetchCampaigns()
-        }
       }
+
+      setStatus('Refreshing campaign data...')
+      await fetchCampaigns()
 
       setStatus('Campaign created successfully!')
       fireConfetti()
