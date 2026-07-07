@@ -16,7 +16,7 @@ All feedback is stored **on-chain** via Soroban smart contract events and cross-
 
 ## Highlighted User Feedback (Sample)
 
-*Note: For the full list of all 50 user onboarding feedbacks, please refer to the onboarding responses CSV file at [docs/Stellar Crowdfund — User Feedback.csv](Stellar%20Crowdfund%20%E2%80%94%20User%20Feedback.csv).*
+*Note: For the full list of all 50 user onboarding feedbacks, please refer to the onboarding responses CSV file at [docs/Stellar_Crowdfund_User_Feedback.csv](Stellar_Crowdfund_User_Feedback.csv).*
 
 ### 1. Ahmet Yılmaz (GC3EX3...NCAU)
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)

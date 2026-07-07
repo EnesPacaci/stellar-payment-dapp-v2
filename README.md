@@ -140,7 +140,7 @@ stellar-payment-dapp/
 ├── screenshots/level5/                 # Level 5 submission screenshots
 ├── docs/
 │   ├── USER_FEEDBACK.md                # User feedback summary
-│   └── Stellar Crowdfund — User Feedback.csv # User onboarding responses CSV
+│   └── Stellar_Crowdfund_User_Feedback.csv # User onboarding responses CSV
 ├── .github/workflows/ci.yml           # CI/CD pipeline
 └── package.json
 ```
@@ -242,7 +242,7 @@ cargo test
 ## User Feedback Iteration Summary
 
 See [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) for detailed feedback and analysis from 50 testnet users.
-* **Onboarding Data (CSV):** [Download User Onboarding CSV](docs/Stellar%20Crowdfund%20%E2%80%94%20User%20Feedback.csv)
+* **Onboarding Data (CSV):** [Download User Onboarding CSV](docs/Stellar_Crowdfund_User_Feedback.csv)
 * **Average Rating:** 4.6 / 5 stars
 
 ### Product Improvements Completed based on User Feedback
