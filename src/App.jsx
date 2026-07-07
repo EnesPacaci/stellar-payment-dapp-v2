@@ -535,7 +535,7 @@ function App() {
   }, [selectedCampaign])
 
   useEffect(() => {
-    if (selectedCampaign) return
+    if (selectedCampaign || showCreateForm) return
     let cancelled = false
     let timeout
     const poll = async () => {
@@ -544,15 +544,15 @@ function App() {
     }
     timeout = setTimeout(poll, 17000)
     return () => { cancelled = true; clearTimeout(timeout) }
-  }, [selectedCampaign, fetchCampaigns])
+  }, [selectedCampaign, showCreateForm, fetchCampaigns])
 
   useEffect(() => {
-    if (!selectedCampaign) return
+    if (!selectedCampaign || isSending) return
     const addr = selectedCampaign.address
     let cancelled = false
     let timeout
     const poll = async () => {
-      if (!isSending && !cancelled) {
+      if (!cancelled) {
         const fresh = await fetchSingleCampaign(addr)
         if (!cancelled && fresh && fresh.name !== 'Loading...' && useStore.getState().selectedCampaign?.address === addr) {
           setSelectedCampaign(fresh)
