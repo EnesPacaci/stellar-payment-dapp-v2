@@ -90,7 +90,7 @@ export default function RecentFeedback() {
               </div>
               {f.comment && (
                 <div className="text-[11px] text-slate-300 mb-1">
-                  "{f.comment.length > 50 ? f.comment.slice(0, 50) + '...' : f.comment}"
+                  "{f.comment.length > 100 ? f.comment.slice(0, 100) + '...' : f.comment}"
                 </div>
               )}
               <div className="text-[11px] text-slate-600">

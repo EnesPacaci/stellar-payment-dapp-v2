@@ -83,7 +83,7 @@ export default function RecentDonations() {
         )}
       </div>
       {recentDonors.length > 0 ? (
-        recentDonors.map((d, i) => {
+        recentDonors.slice(0, 10).map((d, i) => {
           const isYou = publicKey && d.address === publicKey
           return (
             <div

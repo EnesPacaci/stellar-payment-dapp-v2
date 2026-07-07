@@ -1,8 +1,8 @@
-import { Contract, Address, TransactionBuilder, Networks, rpc, nativeToScVal, scValToNative } from '@stellar/stellar-sdk'
+import { Horizon, Contract, Address, TransactionBuilder, Networks, rpc, nativeToScVal, scValToNative } from '@stellar/stellar-sdk'
 import { StellarWalletsKit } from '@creit.tech/stellar-wallets-kit'
 import { SOROBAN_RPC_URL, HORIZON_URL } from './config'
 
-const HORIZON_SERVER = new (await import('@stellar/stellar-sdk')).Horizon.Server(HORIZON_URL)
+const HORIZON_SERVER = new Horizon.Server(HORIZON_URL)
 const SOROBAN_SERVER = new rpc.Server(SOROBAN_RPC_URL)
 
 export async function submitOnChainFeedback(publicKey, campaignAddress, rating, comment) {
