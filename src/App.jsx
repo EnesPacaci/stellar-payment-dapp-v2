@@ -290,13 +290,16 @@ function App() {
 
   const fetchSingleCampaign = useCallback(async (addr) => {
     try {
+      const cached = useStore.getState().selectedCampaign
+      const isCached = cached && cached.address === addr && cached.name !== 'Loading...'
+
       const [info, name, rawMilestones, totalReleased, voteData, admin, totalWithdrawn] = await Promise.all([
         invokeCampaignRead(addr, 'get_info'),
-        invokeCampaignRead(addr, 'get_name'),
+        isCached ? Promise.resolve(cached.name) : invokeCampaignRead(addr, 'get_name'),
         invokeCampaignRead(addr, 'get_milestones'),
         invokeCampaignRead(addr, 'get_total_released'),
         fetchVoteStatus(addr),
-        invokeCampaignRead(addr, 'get_admin'),
+        isCached ? Promise.resolve(cached.admin) : invokeCampaignRead(addr, 'get_admin'),
         invokeCampaignRead(addr, 'get_total_withdrawn'),
       ])
       if (!info) return null

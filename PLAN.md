@@ -168,18 +168,18 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
 ## Level 6 — Black Belt (Beklemede)
 
 ### Program Gereksinimleri (RiseIn)
-- [ ] Twitter profili oluşturma + proje ile ilgili düzenli paylaşımlar
-- [ ] 30+ yeni kullanıcı onboard etme
-- [ ] Stellar Mainnet geçişi
-- [ ] 20+ gerçek mainnet kullanıcısı
-- [ ] Security review / audit
+- [ ] Stellar Mainnet üzerinde akıllı sözleşmelerin yayınlanması (Mainnet Deployment)
+- [ ] Canlı ve üretime hazır (production-ready) web uygulamasının yayına alınması
+- [ ] Minimum 20+ doğrulanmış mainnet kullanıcısı edinmek ve on-chain işlem hareketliliği sağlamak
+- [ ] Akıllı sözleşme güvenlik denetimi (Audit) veya mentor onaylı güvenlik incelemesinin tamamlanması
+- [ ] Twitter/X üzerinde lansman paylaşımı (Product launch post/thread) ve demo içerik tanıtımı
+- [ ] Ekosisteme katkı sağlamak amacıyla teknik blog, atölye çalışması veya açık kaynak kodlu katkı yapılması
+- [ ] Minimum 30+ anlamlı commit ve tam üretim ortamı kurulum dokümantasyonu
 
-### Idea Submission Teknik Planı
-- [ ] Blend Protocol entegrasyonu (boş kampanya fonlarından yield)
-- [ ] Flash loan koruması + withdrawal queue yönetimi
-- [ ] Decentralized verifier staking + slashing mekanizması
-- [ ] Reputasyon sistemi (doğruluk ve katılım bazlı)
-- [ ] NFT metadata upgradeability (dinamik reward içeriği)
+### Teknik Yol Haritası ve Gelişmiş Özellikler (Advanced Features)
+- [ ] **Fee Sponsorship (Gazsız İşlemler):** Yeni bağışçıların onboarding kolaylığı için Stellar Fee Bump kullanılarak gasless işlemlerin entegre edilmesi
+- [ ] **Multi-signature Logic (Çoklu İmza):** Milestone bütçelerinin serbest bırakılması ve kritik yönetim işlemleri için çoklu imza (multi-sig) onay mekanizmasının geliştirilmesi
+- [ ] **Cross-border Flows (SEP-24 / SEP-31):** Cüzdana fiat on-ramp/off-ramp desteği kazandırmak için Anchor entegrasyonunun tamamlanması
 
 ---
 
