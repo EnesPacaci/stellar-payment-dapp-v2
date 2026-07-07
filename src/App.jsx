@@ -244,30 +244,34 @@ function App() {
       const info = await invokeCampaignRead(addr, 'get_milestones')
       const count = Array.isArray(info) ? info.length : 0
 
+      // First query donor stats to check if the user is a donor
+      const [donorTotal, totalVoterWeight, totalDonorCount] = await Promise.all([
+        publicKey
+          ? invokeCampaignRead(addr, 'get_donor_total', nativeToScVal(new Address(publicKey), { type: 'address' })) || '0'
+          : Promise.resolve('0'),
+        invokeCampaignRead(addr, 'get_total_voter_weight') || '0',
+        invokeCampaignRead(addr, 'get_total_donor_count') || '0',
+      ])
+
+      const isDonor = publicKey && donorTotal && donorTotal.toString() !== '0'
+
       const perMilestonePromises = []
       for (let i = 0; i < count; i++) {
         perMilestonePromises.push(
           Promise.all([
             invokeCampaignRead(addr, 'get_vote_status', nativeToScVal(i, { type: 'u32' })),
             invokeCampaignRead(addr, 'get_voted_donor_count', nativeToScVal(i, { type: 'u32' })),
-            publicKey
+            isDonor
               ? invokeCampaignRead(addr, 'get_has_voted', nativeToScVal(new Address(publicKey), { type: 'address' }), nativeToScVal(i, { type: 'u32' }))
               : Promise.resolve(false),
-            publicKey
+            isDonor
               ? invokeCampaignRead(addr, 'get_refund_claimed', nativeToScVal(new Address(publicKey), { type: 'address' }), nativeToScVal(i, { type: 'u32' }))
               : Promise.resolve(false),
           ])
         )
       }
 
-      const [donorTotal, totalVoterWeight, totalDonorCount, ...perMilestoneResults] = await Promise.all([
-        publicKey
-          ? invokeCampaignRead(addr, 'get_donor_total', nativeToScVal(new Address(publicKey), { type: 'address' })) || '0'
-          : Promise.resolve('0'),
-        invokeCampaignRead(addr, 'get_total_voter_weight') || '0',
-        invokeCampaignRead(addr, 'get_total_donor_count') || '0',
-        ...perMilestonePromises,
-      ])
+      const perMilestoneResults = await Promise.all(perMilestonePromises)
 
       const milestones = perMilestoneResults.map(([status, votedCount, hasVoted, refundClaimed]) => ({
         approvals: status ? String(status[0] || '0') : '0',
