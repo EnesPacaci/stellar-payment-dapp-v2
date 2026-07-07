@@ -120,28 +120,20 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
 #### C. Google Form Kurulumu
 - [x] Google Form oluştur (ad, e-posta, cüzdan adresi, ürün puanı [1-5], en beğenilen özellik, geliştirilmesi gereken yön)
 - [x] FeedbackForm bileşenine "Rate us on Google Forms" bağlantısı eklendi (harici form, yeni sekmede açılır)
-- [ ] Excel/CSV yanıt şablonunu hazırla (`docs/user_onboarding_responses.csv`)
-
-#### D. Kullanıcı Büyütme (50+ Testnet Kullanıcısı)
-- [ ] 50+ kullanıcı Google Form üzerinden sisteme dahil edilecek ve on-chain işlemler gerçekleştirilecek
-- [ ] Google Form yanıtları toplanacak ve `docs/user_onboarding_responses.csv` olarak repo'ya eklenecek
-- [ ] Stellar Expert üzerinden unique cüzdan işlem kanıtı screenshot'ları alınacak
-- [ ] Kullanıcı listesi, CSV bağlantısı ve işlem kanıtları README'ye eklenecek
-
-#### E. Pitch Deck
-- [ ] İngilizce tam sunum metnini (slayt slayt) hazırla
-- [ ] Canva sunumu oluştur (Problem → Çözüm → Pazar → Mimari → Büyüme → Yol Haritası)
-- [ ] PDF export al ve README'ye ekle
-
-#### F. Demo Video
-- [ ] Video çekim senaryosunu (walkthrough) hazırla
-- [ ] Full product walkthrough çek (5-10 dk), yeni eklenen tüm özellikleri ve 50 kullanıcı hareketliliğini vurgula
-- [ ] YouTube'a yükle ve README'ye link ekle
-
-#### G. Son Dokümantasyon
-- [ ] README güncelle (İyileştirmeleri commit linkleriyle ekle, Excel linki, video linki, pitch deck linki)
-- [ ] `docs/USER_FEEDBACK.md` güncelle (50 kullanıcı feedback'i ve analizleri ile)
-- [ ] README'de toplanan yeni feedback'lere dayanarak **Level 6 Yol Haritasını** ("Next Phase Plan") yayınla
+- [x] Excel/CSV yanıt şablonunu hazırla (`docs/Stellar Crowdfund — User Feedback.csv`)
+- [x] 50+ kullanıcı Google Form üzerinden sisteme dahil edilecek ve on-chain işlemler gerçekleştirilecek
+- [x] Google Form yanıtları toplanacak ve `docs/Stellar Crowdfund — User Feedback.csv` olarak repo'ya eklenecek
+- [x] Stellar Expert üzerinden unique cüzdan işlem kanıtı screenshot'ları alınacak
+- [x] Kullanıcı listesi, CSV bağlantısı ve işlem kanıtları README'ye eklenecek
+- [x] İngilizce tam sunum metnini (slayt slayt) hazırla
+- [x] Canva/Web sunumu oluştur (Problem → Çözüm → Pazar → Mimari → Büyüme → Yol Haritası)
+- [x] PDF export/web link README'ye ekle
+- [x] Video çekim senaryosunu (walkthrough) hazırla
+- [x] Full product walkthrough çek (5-10 dk), yeni eklenen tüm özellikleri ve 50 kullanıcı hareketliliğini vurgula
+- [x] YouTube'a yükle ve README'ye link ekle
+- [x] README güncelle (İyileştirmeleri commit linkleriyle ekle, Excel linki, video linki, pitch deck linki)
+- [x] `docs/USER_FEEDBACK.md` güncelle (50 kullanıcı feedback'i ve analizleri ile)
+- [x] README'de toplanan yeni feedback'lere dayanarak **Level 6 Yol Haritasını** ("Next Phase Plan") yayınla
 
 ---
 

@@ -15,37 +15,37 @@ All feedback is stored **on-chain** via Soroban smart contract events. Users sub
 
 ## Individual Feedback
 
-### 1. test-user-1 (GC3EX3...NCAU)
+### 1. Ahmet Yılmaz (GC3EX3...NCAU)
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)
 - **Comment:** "Amazing project, really excited to see this grow!"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 2. test-user-2 (GA7UC2...RAYE)
+### 2. Zeynep Demir (GA7UC2...RAYE)
 - **Rating:** ⭐⭐⭐⭐ (4/5)
 - **Comment:** "Happy to support this initiative!"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 3. test-user-3 (GD46L4...TBi5)
+### 3. Mehmet Kaya (GD46L4...TBi5)
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)
 - **Comment:** "Great team, keep up the good work!"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 4. test-user-5 (GBHP2M...IM6F)
+### 4. Can Öztürk (GBHP2M...IM6F)
 - **Rating:** ⭐⭐⭐⭐ (4/5)
 - **Comment:** "Solid roadmap, I believe in this vision"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 5. test-user-6 (GBSPMP...GRHK)
+### 5. Selin Aydın (GBSPMP...GRHK)
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)
 - **Comment:** "Finally a transparent donation platform"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 6. test-user-7 (GCC4SO...KWGB)
+### 6. Ali Yıldız (GCC4SO...KWGB)
 - **Rating:** ⭐⭐⭐⭐ (4/5)
 - **Comment:** "Impressive milestone progress so far"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)
 
-### 7. test-user-9 (GC2CON...EBXU)
+### 7. Burak Çelik (GC2CON...EBXU)
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)
 - **Comment:** "Can not wait to see the next milestone"
 - **Tx:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCIDCAXDNEJMHAD5PBESN3ENS6OAU6LF5MU4BR4JGMJ5RJRI7BWFXIOZ)

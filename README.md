@@ -1,14 +1,18 @@
 # Stellar Crowdfund dApp
 
-A decentralized crowdfunding application built on the Stellar testnet using Soroban smart contracts with milestone-based fund release, donor-protected voting escrow, and soulbound Proof-of-Impact NFTs. Part of the **Stellar Journey To Mastery - Monthly Builder Challenge (Level 4 - Green Belt)**.
+A decentralized crowdfunding application built on the Stellar testnet using Soroban smart contracts with milestone-based fund release, donor-protected voting escrow, and soulbound Proof-of-Impact NFTs. Part of the **Stellar Journey To Mastery - Monthly Builder Challenge (Level 5 - Blue Belt)**.
 
 ## Live Demo
 
-[View Live App](https://stellar-payment-dapp-chi.vercel.app)
+[View Live App](https://stellar-payment-dapp-v2.vercel.app)
+
+## Pitch Deck (Interactive Web Presentation)
+
+[View Pitch Deck Presentation](https://stellar-payment-dapp-v2.vercel.app/pitch-deck.html) (Natively developed by Enes Paçacı)
 
 ## Demo Video
 
-[Stellar Crowdfund dApp - Level 4 Demo](https://youtu.be/XsBphLXYVqg)
+[Stellar Crowdfund dApp - Level 5 Demo Video](https://youtu.be/fGBAvFED5iI)
 
 ## Features
 
@@ -41,7 +45,7 @@ A decentralized crowdfunding application built on the Stellar testnet using Soro
 ## Smart Contracts
 
 ### Factory Contract
-- **Address:** `CDXVHHKWEA7VA62KZKMTUCLQC6XR3URCZBA7QGPAFE6PP4AY2NG675TM`
+- **Address:** `CA2VBHQEOWCSDRMDRDCGRAGT6FDFS6MPFMNARGXON2WYSOIHEFPXFDNM`
 - **Functions:**
   - `initialize(admin, campaign_wasm)` — Set admin and campaign WASM hash
   - `create_campaign(creator, name, goal, deadline, milestones)` — Deploy a new Campaign contract
@@ -51,7 +55,7 @@ A decentralized crowdfunding application built on the Stellar testnet using Soro
   - `set_nft_contract(nft_contract)` — Set NFT contract address (admin only)
 
 ### Campaign Contract
-- **WASM Hash:** `84ecd4aa230319b8e9fc065312dae6cd2085216bb9eb60e715b9e5b990ed0993`
+- **WASM Hash:** `991d0aa38ac349140ca7e266af51af04d3e6c3da3540ff901887dca093b1b293`
 - **Functions:**
   - `init(admin, factory, name, goal, deadline, milestones)` — Initialize campaign with milestones and token address
   - `donate(donor, amount)` — Donate XLM (transfers from donor to contract)
@@ -70,7 +74,7 @@ A decentralized crowdfunding application built on the Stellar testnet using Soro
   - `get_feedback()` / `get_feedback_count()` — On-chain feedback
 
 ### Reward NFT Contract
-- **Address:** `CBTSMA4A4GUFMXLGYVXXMYFXGP6V65NS7GHENDTN2TWT6YWRVRKBNFBA`
+- **Address:** `CB7ORHLBDQML2D3KXNSE6VGVTQQKLNQY2DYGLPKXLKFJMCPFDH6TMSZZ`
 - **Functions:**
   - `init(admin)` — Initialize NFT contract
   - `mint(to, token_id, campaign, milestone, amount)` — Mint soulbound NFT (admin only)
@@ -132,10 +136,11 @@ stellar-payment-dapp/
 │   ├── health.js                       # Health check endpoint
 │   └── metrics.js                      # On-chain metrics endpoint
 ├── scripts/
-│   └── demo.cjs                        # Automated 10-user simulation
-├── screenshots/level4/                 # Level 4 submission screenshots
+│   └── demo.cjs                        # Automated 50-user simulation
+├── screenshots/level5/                 # Level 5 submission screenshots
 ├── docs/
-│   └── USER_FEEDBACK.md                # User feedback summary
+│   ├── USER_FEEDBACK.md                # User feedback summary
+│   └── Stellar Crowdfund — User Feedback.csv # User onboarding responses CSV
 ├── .github/workflows/ci.yml           # CI/CD pipeline
 └── package.json
 ```
@@ -195,42 +200,69 @@ cargo test
 
 ## Screenshots
 
-### Product UI - Campaign List
-![Campaign List](screenshots/level4/campaigns_page.png)
+### Product UI - Campaigns List
+![Campaign List](screenshots/level5/campaigns_page.png)
+![Campaign List Mobile](screenshots/level5/campaigns_page_mobile_responsive_ui.png)
 
-### Campaign Detail with Milestones & Voting
-![Campaign Detail](screenshots/level4/campaign_detail_1.png)
+### Campaign Detail Views (Active Milestone & Voting Escrow)
+![Campaign Detail 1](screenshots/level5/campaign_details_page_1.png)
+![Campaign Detail 1 Mobile](screenshots/level5/campaign_details_page_1_mobile_responsive_ui.png)
+![Campaign Detail 2](screenshots/level5/campaign_details_page_2.png)
+![Campaign Detail 2 Mobile](screenshots/level5/campaign_details_page_2_mobile_responsive_ui.png)
+![Campaign Detail 3](screenshots/level5/campaign_details_page_3.png)
+![Campaign Detail 3 Mobile](screenshots/level5/campaign_details_page_3_mobile_responsive_ui.png)
 
-### Recent Donations & User Feedback
-![Donations & Feedback](screenshots/level4/campaign_detail_2.png)
+### Create Campaign Modal Form
+![Create Campaign](screenshots/level5/create_campaign.png)
+![Create Campaign Mobile](screenshots/level5/create_campaign_mobile_responsive_ui.png)
 
-### Mobile Responsive Design
-![Mobile UI](screenshots/level4/campaign_detail_mobile_responsive_ui.png)
+### Proof-of-Impact Soulbound NFTs Gallery
+![NFTs](screenshots/level5/NFTs.png)
 
-### Create Campaign Form
-![Create Campaign](screenshots/level4/new_campaign.png)
+### Onboarding "Quick Start" Tutorial Guide
+![Quick Start](screenshots/level5/quick_start_guide.png)
 
-### Proof-of-Impact NFTs
-![NFTs](screenshots/level4/NFTs.png)
+### Google Forms Onboarding responses (50 Submissions)
+![Google Forms responses](screenshots/level5/google_forms_responses.png)
 
-### CI/CD Pipeline - GitHub Actions
-![CI Pipeline](screenshots/level4/ci_pipeline.png)
+### CI/CD Pipeline - GitHub Actions & Vercel
+![CI Pipeline](screenshots/level5/ci_pipeline.png)
+![CD Pipeline](screenshots/level5/cd_pipeline.png)
 
-### Production Deployment - Vercel
-![CD Pipeline](screenshots/level4/cd_pipeline.png)
+### Proof of 50+ User Wallet Interactions (Stellar Expert Testnet explorer logs)
+![Wallet Interactions 1](screenshots/level5/proof_of_wallet_interactions_1.png)
+![Wallet Interactions 2](screenshots/level5/proof_of_wallet_interactions_2.png)
+![Wallet Interactions 3](screenshots/level5/proof_of_wallet_interactions_3.png)
+![Wallet Interactions 4](screenshots/level5/proof_of_wallet_interactions_4.png)
+![Wallet Interactions 5](screenshots/level5/proof_of_wallet_interactions_5.png)
+![Wallet Interactions 6](screenshots/level5/proof_of_wallet_interactions_6.png)
+![Wallet Interactions 7](screenshots/level5/proof_of_wallet_interactions_7.png)
+![Wallet Interactions 8](screenshots/level5/proof_of_wallet_interactions_8.png)
 
-### Monitoring & Analytics - Vercel Dashboard
-![Analytics](screenshots/level4/analytics_or_monitoring.png)
+## User Feedback Iteration Summary
 
-### Proof of 10+ User Wallet Interactions
-![Wallet Interactions](screenshots/level4/proof_of_wallet_interactions_1.png)
-![Wallet Interactions 2](screenshots/level4/proof_of_wallet_interactions_2.png)
+See [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) for detailed feedback and analysis from 50 testnet users.
+* **Onboarding Data (CSV):** [Download User Onboarding CSV](docs/Stellar%20Crowdfund%20—%20User%20Feedback.csv)
+* **Average Rating:** 4.6 / 5 stars
 
-## User Feedback Summary
+### Product Improvements Completed based on User Feedback
 
-See [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) for detailed feedback from 10 testnet users.
+Based on initial user evaluations, we implemented and deployed three main product improvements:
 
-**Average Rating: 4.6/5 stars** | 8 feedback submissions on-chain
+1. **UX/UI Performance Optimization**
+   * *Improvement:* Background campaigns polling is paused when the campaign creation view is open, reducing unnecessary RPC roundtrips and optimizing UI loading responsiveness.
+   * *Commit Link:* [99ad158](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/99ad1586a1172db763e02029c7827e8d4791ea83)
+2. **Security & Access Controls Enforcement**
+   * *Improvement:* Restricted milestone submission actions strictly to the campaign creator (admin) and fixed campaign detail cache checking to resolve creator-withdraw button rendering.
+   * *Commit Link:* [cd79f63](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/cd79f6305a41cb5df16a750059e87593c6607e0c)
+3. **Recent Donors Transaction Slicing**
+   * *Improvement:* Aligned total donor count labels with lists by correcting formatting slicing constraints and removing redundant parallel on-chain queries.
+
+### Ecosystem Future Roadmap (Next Phase Plan)
+
+1. **Fee Sponsorship (Gasless Transactions):** Enable seamless onboarding of non-crypto users by sponsoring transaction network fees using Stellar Fee Bumps.
+2. **Multi-Signature Escrow Control:** Require multi-signature (multi-sig) approvals for campaign administrative actions to guarantee high funds protection.
+3. **SEP-24 Native USDC Ramps:** Direct integration of Stellar anchors to allow direct fiat deposits and withdrawals inside the application interface.
 
 ## License
 
