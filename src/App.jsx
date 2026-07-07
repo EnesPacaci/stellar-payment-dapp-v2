@@ -117,6 +117,7 @@ function App() {
 
   const campaignSearch = useStore((s) => s.campaignSearch)
   const setCampaignSearch = useStore((s) => s.setCampaignSearch)
+  const isAdmin = publicKey && selectedCampaign && selectedCampaign.admin === publicKey
 
   const setTimedStatus = (msg) => {
     setStatus(msg)
@@ -291,7 +292,7 @@ function App() {
   const fetchSingleCampaign = useCallback(async (addr) => {
     try {
       const cached = useStore.getState().selectedCampaign
-      const isCached = cached && cached.address === addr && cached.name !== 'Loading...'
+      const isCached = cached && cached.address === addr && cached.name !== 'Loading...' && cached.admin
 
       const [info, name, rawMilestones, totalReleased, voteData, admin, totalWithdrawn] = await Promise.all([
         invokeCampaignRead(addr, 'get_info'),
@@ -445,15 +446,15 @@ function App() {
           })
           .filter(Boolean)
           .reverse()
-        setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
-        setRecentDonors(donations)
+        setDonationCount(donations.length)
+        setRecentDonors(donations.slice(0, 10))
       } else {
         const key = `crowdfund_donations_${selectedCampaign.address}`
         const stored = localStorage.getItem(key)
         if (stored) {
           const donations = JSON.parse(stored)
-          setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
-          setRecentDonors(donations)
+          setDonationCount(donations.length)
+          setRecentDonors(donations.slice(0, 10))
         } else {
           setDonationCount(0)
           setRecentDonors([])
@@ -465,8 +466,8 @@ function App() {
         const stored = localStorage.getItem(key)
         if (stored) {
           const donations = JSON.parse(stored)
-          setDonationCount(selectedCampaign.totalDonorCount ? Number(selectedCampaign.totalDonorCount) : donations.length)
-          setRecentDonors(donations)
+          setDonationCount(donations.length)
+          setRecentDonors(donations.slice(0, 10))
         } else {
           setDonationCount(0)
           setRecentDonors([])
@@ -1642,7 +1643,7 @@ function App() {
                           )}
 
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            {st === 0 && (
+                            {st === 0 && isAdmin && (
                               <button
                                 onClick={() => submitMilestone(selectedCampaign.address, i)}
                                 disabled={isSending}
@@ -1721,7 +1722,6 @@ function App() {
                   </div>
                   {(() => {
                     const available = Number(selectedCampaign.totalReleased || 0) - Number(selectedCampaign.totalWithdrawn || 0)
-                    const isAdmin = publicKey && selectedCampaign.admin === publicKey
                     if (available > 0 && isAdmin) {
                       return (
                         <div className="flex justify-center mt-3">
