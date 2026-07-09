@@ -4,11 +4,11 @@ A decentralized crowdfunding application built on the Stellar testnet using Soro
 
 ## Live Demo
 
-[View Live App](https://stellar-payment-dapp-v2.vercel.app)
+[View Live App](https://stellar-payment-dapp-chi.vercel.app)
 
 ## Pitch Deck (Interactive Web Presentation)
 
-[View Pitch Deck Presentation](https://stellar-payment-dapp-v2.vercel.app/pitch-deck.html) (Natively developed by Enes Paçacı)
+[View Pitch Deck Presentation](https://stellar-payment-dapp-chi.vercel.app/pitch-deck.html) (Natively developed by Enes Paçacı)
 
 ## Demo Video
 

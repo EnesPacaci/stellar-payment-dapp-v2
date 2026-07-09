@@ -9,7 +9,7 @@
 | **Yan Program** | Vibe Coding 30 (Level 4 teslim edildi ✅) |
 | **Canlı (Vibe Coding)** | https://stellar-payment-dapp-chi.vercel.app |
 | **Yeni Repo (Level 5+)** | https://github.com/EnesPacaci/stellar-payment-dapp-v2 |
-| **Canlı (Level 5+)** | https://stellar-payment-dapp-v2.vercel.app |
+| **Canlı (Level 5+)** | https://stellar-payment-dapp-chi.vercel.app |
 | **Demo Video (L4)** | https://youtu.be/XsBphLXYVqg |
 | **Eski Repo (Vibe Coding)** | https://github.com/EnesPacaci/stellar-payment-dapp |
 
@@ -77,7 +77,7 @@ RiseIn gereksinimlerine %100 odaklanılacak. Idea Submission'da planlanan SEP-24
 #### A. Kod & Deployment (Zaten Tamam ✅)
 - [x] Public GitHub repo (stellar-payment-dapp-v2)
 - [x] 49 commit (20+ şartı fazlasıyla karşılanıyor)
-- [x] Live deployed app (https://stellar-payment-dapp-v2.vercel.app)
+- [x] Live deployed app (https://stellar-payment-dapp-chi.vercel.app)
 
 #### B. Ürün İyileştirmeleri (Mevcut L4 Feedback'lerine Göre)
 ##### 1. UX/UI Geliştirmeleri (Arayüz Kalitesi)
