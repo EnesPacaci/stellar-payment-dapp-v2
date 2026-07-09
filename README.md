@@ -251,10 +251,10 @@ Based on initial user evaluations, we implemented and deployed three main produc
 
 1. **UX/UI Performance Optimization**
    * *Improvement:* Background campaigns polling is paused when the campaign creation view is open, reducing unnecessary RPC roundtrips and optimizing UI loading responsiveness.
-   * *Commit Link:* [99ad158](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/99ad1588cd5d0889b09c1b5c255e0f8dcc9b7b26)
+   * *Commit Link:* [99ad158](https://github.com/EnesPacaci/stellar-payment-dapp/commit/99ad1588cd5d0889b09c1b5c255e0f8dcc9b7b26)
 2. **Security & Access Controls Enforcement**
    * *Improvement:* Restricted milestone submission actions strictly to the campaign creator (admin) and fixed campaign detail cache checking to resolve creator-withdraw button rendering.
-   * *Commit Link:* [cd79f63](https://github.com/EnesPacaci/stellar-payment-dapp-v2/commit/cd79f6395b7f2a88382c9d2178823e66a2a82131)
+   * *Commit Link:* [cd79f63](https://github.com/EnesPacaci/stellar-payment-dapp/commit/cd79f6395b7f2a88382c9d2178823e66a2a82131)
 3. **Recent Donors Transaction Slicing**
    * *Improvement:* Aligned total donor count labels with lists by correcting formatting slicing constraints and removing redundant parallel on-chain queries.
 
